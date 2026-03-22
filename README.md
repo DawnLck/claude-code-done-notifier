@@ -1,5 +1,7 @@
 # claude-code-done-notifier
 
+[English](#claude-code-done-notifier) | [简体中文](#claude-code-done-notifier-zh)
+
 A macOS notification hook for [Claude Code](https://claude.ai/code) that fires whenever Claude finishes a task.
 
 **Features:**
@@ -125,20 +127,6 @@ Stop hook fires → notify-done.sh receives JSON on stdin
 8. Optional: push to ntfy.sh topic for cross-device alert
 ```
 
-### Supported terminals & editors
-
-| App | Detection method | Bundle ID |
-|---|---|---|
-| Terminal.app | `$TERM_PROGRAM=Apple_Terminal` | `com.apple.Terminal` |
-| iTerm2 | `$TERM_PROGRAM=iTerm.app` | `com.googlecode.iterm2` |
-| Warp | `$TERM_PROGRAM=WarpTerminal` | `dev.warp.Warp-Stable` |
-| VS Code | `$TERM_PROGRAM=vscode` + process tree | `com.microsoft.VSCode` |
-| Cursor | `$TERM_PROGRAM=vscode` + process tree | `com.todesktop.230313mzl4w4u92` |
-| Hyper | process tree | `co.zeit.hyper` |
-| Alacritty | process tree | `org.alacritty` |
-| kitty | process tree | `net.kovidgoyal.kitty` |
-| Ghostty | process tree | `com.mitchellh.ghostty` |
-
 ---
 
 ## Configuration
@@ -149,7 +137,7 @@ All options are set as environment variables in `~/.claude/settings.json`:
 {
   "env": {
     "NOTIFY_DONE_LANG":           "zh",
-    "NOTIFY_DONE_ONLY_WHEN_AWAY": "1",
+    "NOTIFY_DONE_ONLY_WHEN_AWAY": "true",
     "NOTIFY_DONE_NTFY_TOPIC":     "my-claude-alerts"
   }
 }
@@ -158,66 +146,188 @@ All options are set as environment variables in `~/.claude/settings.json`:
 | Variable | Default | Description |
 |---|---|---|
 | `NOTIFY_DONE_LANG` | auto | Force language: `zh` or `en`. Auto-detects from `$LANG` if unset. |
-| `NOTIFY_DONE_ONLY_WHEN_AWAY` | `0` | Set to `1` to suppress the notification when the originating terminal is already the frontmost app. |
-| `NOTIFY_DONE_NTFY_TOPIC` | unset | Your [ntfy.sh](https://ntfy.sh) topic name. When set, also sends a push notification to that topic — great for phone alerts on long tasks. |
-
-### Cross-device push with ntfy
-
-1. Install the [ntfy app](https://ntfy.sh) on your phone.
-2. Subscribe to a topic name of your choice (e.g. `claude-echo-alerts`).
-3. Set the env var:
-   ```json
-   { "env": { "NOTIFY_DONE_NTFY_TOPIC": "claude-echo-alerts" } }
-   ```
-
-No account needed. The topic name acts as a shared secret — pick something non-obvious.
-
-### Change the sound
-
-Edit `notify-done.sh` and replace `Glass` with any macOS system sound:
-
-```
-Basso  Blow  Bottle  Frog  Funk  Hero  Morse
-Ping   Pop   Purr    Sosumi  Submarine  Tink
-```
-
-### Add a new terminal
-
-Add a new `case` entry in the `detect_bundle_id()` function. To find any app's bundle ID:
-```bash
-osascript -e 'id of app "YourApp"'
-```
+| `NOTIFY_DONE_ONLY_WHEN_AWAY` | `"false"` | Set to `"true"` to suppress the notification when the originating terminal is already the frontmost app. |
+| `NOTIFY_DONE_NTFY_TOPIC` | unset | Your [ntfy.sh](https://ntfy.sh) topic name. When set, also sends a push notification to that topic. |
 
 ---
 
 ## Troubleshooting
 
-**Notification doesn't appear**
-- Check System Settings → Notifications → terminal-notifier is allowed
-- Run manually: `echo '{}' | bash ~/.claude/hooks/notify-done.sh`
-
-**Clicking the notification doesn't focus the right window**
-- Verify `terminal-notifier` is installed: `which terminal-notifier`
-- Check System Settings → Notifications → terminal-notifier has permission
-
-**Summary is empty or generic**
-- The transcript may not have been written yet at hook fire time (rare race condition)
-- The hook falls back to the locale-appropriate generic string
-
-**Hook not firing**
-- Open `/hooks` in Claude Code or restart the session
-- Validate settings.json: `jq empty ~/.claude/settings.json`
+- **Notification doesn't appear**: Check System Settings → Notifications → terminal-notifier.
+- **Click doesn't focus**: Verify `terminal-notifier` is installed.
+- **Summary is generic**: The hook falls back to a locale-appropriate generic string if the transcript isn't ready.
 
 ---
 
-## Contributing
+# <a name="claude-code-done-notifier-zh"></a>claude-code-done-notifier (简体中文)
 
-PRs welcome! Areas for improvement:
-- Linux support (via `notify-send` / `libnotify`)
-- More terminal app detection
+[English](#claude-code-done-notifier) | [简体中文](#claude-code-done-notifier-zh)
+
+一个为 [Claude Code](https://claude.ai/code) 提供的 macOS 通知钩子，在 Claude 完成任务时触发。
+
+**功能特性：**
+- **显示 Claude 最后回复的第一句话** 作为通知主体 — 真正摘要了所做的工作。
+- **显示会话时长和项目名称** 在副标题中。
+- **点击通知激活对应的终端或编辑器窗口**，直接回到 Claude 运行的地方。
+- **支持中英文双语** (自动检测或手动配置)。
+- **播放 macOS 系统音 "Glass"**。
+- **可选：通过 [ntfy.sh](https://ntfy.sh) 进行跨设备推送** (手机端提醒)。
+- **可选：焦点感知模式** — 如果你正在查看终端，则静默通知。
+- **支持多种终端与编辑器**：Terminal, iTerm2, Warp, VS Code, Cursor, Hyper, Alacritty, kitty, Ghostty。
 
 ---
 
-## License
+## 演示
+
+```
+╔══════════════════════════════════════════════════════╗
+║  ✅ Claude Code — 已完成                             ║
+║  修复了 proxy-llm.ts 中的计费差异，并更新了两处 COST 常量。║
+║  prompt-miner · 3m 42s · ↩ Warp                     ║
+╚══════════════════════════════════════════════════════╝
+```
+*(点击气泡可将 Warp 窗口切换至前台)*
+
+---
+
+## 环境要求
+
+| 要求 | 说明 |
+|---|---|
+| macOS | 通知使用 macOS 原生 API |
+| [Claude Code](https://claude.ai/code) | Anthropic 推出的 CLI 工具 |
+| [Homebrew](https://brew.sh) | 安装脚本用于获取依赖 |
+| `jq` | JSON 解析 (`brew install jq`) — 安装脚本会自动处理 |
+| `terminal-notifier` | 点击跳转支持 (`brew install terminal-notifier`) — 安装脚本会自动处理 |
+
+---
+
+## 安装指南
+
+### 一键安装 (推荐)
+
+```bash
+git clone https://github.com/DawnLck/claude-code-done-notifier.git
+cd claude-code-done-notifier
+bash install.sh
+```
+
+完成后 **重启 Claude Code** 或输入 `/hooks` 进行激活。
+
+### 手动安装
+
+1. 安装依赖：
+   ```bash
+   brew install jq terminal-notifier
+   ```
+
+2. 复制钩子脚本：
+   ```bash
+   mkdir -p ~/.claude/hooks
+   cp notify-done.sh ~/.claude/hooks/notify-done.sh
+   chmod +x ~/.claude/hooks/notify-done.sh
+   ```
+
+3. 在 `~/.claude/settings.json` 中配置钩子：
+   ```json
+   {
+     "hooks": {
+       "Stop": [
+         {
+           "hooks": [
+             {
+               "type": "command",
+               "command": "bash ~/.claude/hooks/notify-done.sh",
+               "async": true
+             }
+           ]
+         }
+       ]
+     }
+   }
+   ```
+
+4. 重启 Claude Code。
+
+---
+
+## 卸载
+
+```bash
+bash install.sh --uninstall
+```
+
+---
+
+## 工作细节
+
+```
+Claude 完成任务
+        ↓
+触发 Stop 钩子 → notify-done.sh 从 stdin 接收 JSON
+        ↓
+1. 从 JSON 中提取 session_id
+2. 查找会话日志: ~/.claude/projects/**/<session_id>.jsonl
+3. 解析日志：
+   • 耗时      → 首尾时间戳之差
+   • 项目      → 从日志目录名中解码
+   • 摘要      • Claude 最后一条回复的第一句话
+        ↓
+4. 检测终端应用：
+   TERM_PROGRAM 环境变量 → 遍历进程树 → osascript 兜底
+        ↓
+5. 焦点检查 (若 NOTIFY_DONE_ONLY_WHEN_AWAY=1):
+   如果终端已在前台，则跳过通知
+        ↓
+6. 语言检测：
+   从 NOTIFY_DONE_LANG / $LANG / $LC_ALL 中识别
+        ↓
+7. 通过 terminal-notifier 发送通知：
+   -activate <bundle-id>  ← 使其可点击并跳转至正确窗口
+        ↓
+8. 可选：推送至 ntfy.sh 话题，实现跨设备提醒
+```
+
+---
+
+## 配置选项
+
+所有选项均作为环境变量在 `~/.claude/settings.json` 中设置：
+
+```json
+{
+  "env": {
+    "NOTIFY_DONE_LANG":           "zh",
+    "NOTIFY_DONE_ONLY_WHEN_AWAY": "true",
+    "NOTIFY_DONE_NTFY_TOPIC":     "my-claude-alerts"
+  }
+}
+```
+
+| 变量 | 默认值 | 描述 |
+|---|---|---|
+| `NOTIFY_DONE_LANG` | auto | 强制指定语言：`zh` 或 `en`。未设置时自动检测 `$LANG`。 |
+| `NOTIFY_DONE_ONLY_WHEN_AWAY` | `"false"` | 设置为 `"true"` 时，如果所在的终端窗口已处于最前，则不发送通知。 |
+| `NOTIFY_DONE_NTFY_TOPIC` | 未设置 | 你的 [ntfy.sh](https://ntfy.sh) 话题名称。设置后会同步发送推送通知。 |
+
+---
+
+## 故障排除
+
+- **通知未出现**：检查 系统设置 → 通知 → 允许 terminal-notifier。
+- **点击无法跳转**：确认已安装 `terminal-notifier`。
+- **摘要内容为空**：如果钩子触发时日志尚未写入，会自动回退到本地化的通用文案。
+
+---
+
+## 参与贡献
+
+欢迎提交 PR！改进方向：
+- Linux 支持 (通过 `notify-send` / `libnotify`)
+- 更多终端应用的检测支持
+
+---
+
+## 开源协议
 
 MIT

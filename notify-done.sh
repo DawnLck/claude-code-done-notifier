@@ -13,7 +13,7 @@
 #
 # ── Configuration (set in ~/.claude/settings.json → "env": { … }) ─────────────
 #   NOTIFY_DONE_LANG            "zh" or "en"  (default: auto-detect from $LANG)
-#   NOTIFY_DONE_ONLY_WHEN_AWAY  "1"           (default: "0") — skip notification
+#   NOTIFY_DONE_ONLY_WHEN_AWAY  "true"        (default: "false") — skip notification
 #                                              if the terminal is already focused
 #   NOTIFY_DONE_NTFY_TOPIC      "<topic>"     (default: unset) — push to ntfy.sh
 #                                              topic for cross-device alerts
@@ -151,10 +151,10 @@ case "$BUNDLE_ID" in
 esac
 
 # ─── 4. Focus check (opt-in) ──────────────────────────────────────────────────
-# Set NOTIFY_DONE_ONLY_WHEN_AWAY=1 to suppress the notification when the
+# Set NOTIFY_DONE_ONLY_WHEN_AWAY=true to suppress the notification when the
 # originating terminal/editor is already the frontmost app.
 
-if [[ "${NOTIFY_DONE_ONLY_WHEN_AWAY:-0}" == "1" && -n "$BUNDLE_ID" ]]; then
+if [[ "${NOTIFY_DONE_ONLY_WHEN_AWAY:-false}" == "true" && -n "$BUNDLE_ID" ]]; then
   _front=$(osascript -e \
     'bundle identifier of (info for (path to frontmost application))' \
     2>/dev/null || true)

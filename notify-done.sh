@@ -12,7 +12,10 @@
 #
 # ── Configuration (set in ~/.claude/settings.json → "env": { … }) ─────────────
 #   NOTIFY_DONE_LANG            "zh" or "en"  (default: auto-detect from $LANG)
-#   NOTIFY_DONE_ONLY_WHEN_AWAY  "true"        (default: "false") — skip notification
+#   NOTIFY_DONE_SHOW_SUMMARY    "true"/"false" (default: "true")  — Claude's reply
+#   NOTIFY_DONE_SHOW_DURATION   "true"/"false" (default: "true")  — task duration
+#   NOTIFY_DONE_SHOW_PROJECT    "true"/"false" (default: "true")  — project name
+#   NOTIFY_DONE_ONLY_WHEN_AWAY  "true"/"false" (default: "false") — skip notification
 #                                              if the terminal is already focused
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -176,16 +179,18 @@ fi
 
 # Subtitle: project · duration · click to return
 _sub_parts=()
-[[ -n "$PROJECT"  ]] && _sub_parts+=("$PROJECT")
-[[ -n "$DURATION" ]] && _sub_parts+=("$DURATION")
+[[ "${NOTIFY_DONE_SHOW_PROJECT:-true}"  == "true" && -n "$PROJECT"  ]] && _sub_parts+=("$PROJECT")
+[[ "${NOTIFY_DONE_SHOW_DURATION:-true}" == "true" && -n "$DURATION" ]] && _sub_parts+=("$DURATION")
 
 if [[ "$_lang" == "zh" ]]; then
   TITLE="✅ Claude Code 已完成"
-  MSG="${SUMMARY:-任务已完成}"
+  [[ "${NOTIFY_DONE_SHOW_SUMMARY:-true}" == "true" ]] \
+    && MSG="${SUMMARY:-任务已完成}" || MSG="任务已完成"
   _sub_parts+=("点击返回 $APP_NAME")
 else
   TITLE="✅ Claude Code — Done"
-  MSG="${SUMMARY:-Task completed}"
+  [[ "${NOTIFY_DONE_SHOW_SUMMARY:-true}" == "true" ]] \
+    && MSG="${SUMMARY:-Task completed}" || MSG="Task completed"
   _sub_parts+=("↩ $APP_NAME")
 fi
 

@@ -134,7 +134,10 @@ All options are set as environment variables in `~/.claude/settings.json`:
 {
   "env": {
     "NOTIFY_DONE_LANG":           "zh",
-    "NOTIFY_DONE_ONLY_WHEN_AWAY": "true"
+    "NOTIFY_DONE_SHOW_SUMMARY":   "true",
+    "NOTIFY_DONE_SHOW_DURATION":  "true",
+    "NOTIFY_DONE_SHOW_PROJECT":   "true",
+    "NOTIFY_DONE_ONLY_WHEN_AWAY": "false"
   }
 }
 ```
@@ -142,7 +145,10 @@ All options are set as environment variables in `~/.claude/settings.json`:
 | Variable | Default | Description |
 |---|---|---|
 | `NOTIFY_DONE_LANG` | auto | Force language: `zh` or `en`. Auto-detects from `$LANG` if unset. |
-| `NOTIFY_DONE_ONLY_WHEN_AWAY` | `"false"` | Set to `"true"` to suppress the notification when the originating terminal is already the frontmost app. |
+| `NOTIFY_DONE_SHOW_SUMMARY` | `"true"` | Show Claude's reply summary as the notification body. |
+| `NOTIFY_DONE_SHOW_DURATION` | `"true"` | Show task duration in the subtitle. |
+| `NOTIFY_DONE_SHOW_PROJECT` | `"true"` | Show project name in the subtitle. |
+| `NOTIFY_DONE_ONLY_WHEN_AWAY` | `"false"` | Suppress the notification when the originating terminal is already the frontmost app. |
 
 ---
 
@@ -290,7 +296,10 @@ Claude 完成任务
 {
   "env": {
     "NOTIFY_DONE_LANG":           "zh",
-    "NOTIFY_DONE_ONLY_WHEN_AWAY": "true"
+    "NOTIFY_DONE_SHOW_SUMMARY":   "true",
+    "NOTIFY_DONE_SHOW_DURATION":  "true",
+    "NOTIFY_DONE_SHOW_PROJECT":   "true",
+    "NOTIFY_DONE_ONLY_WHEN_AWAY": "false"
   }
 }
 ```
@@ -298,6 +307,9 @@ Claude 完成任务
 | 变量 | 默认值 | 描述 |
 |---|---|---|
 | `NOTIFY_DONE_LANG` | auto | 强制指定语言：`zh` 或 `en`。未设置时自动检测 `$LANG`。 |
+| `NOTIFY_DONE_SHOW_SUMMARY` | `"true"` | 是否在通知正文中显示 Claude 的回复摘要。 |
+| `NOTIFY_DONE_SHOW_DURATION` | `"true"` | 是否在副标题中显示任务耗时。 |
+| `NOTIFY_DONE_SHOW_PROJECT` | `"true"` | 是否在副标题中显示项目名称。 |
 | `NOTIFY_DONE_ONLY_WHEN_AWAY` | `"false"` | 设置为 `"true"` 时，如果所在的终端窗口已处于最前，则不发送通知。 |
 
 ---

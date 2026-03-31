@@ -529,6 +529,11 @@ if [[ "$HOOK_EVENT" == "Notification" ]]; then
 else
   _sound_file="${NOTIFY_SOUND_END:-${NOTIFY_SOUND_FILE:-}}"
 fi
+
+# Determine if a custom sound will be played (to suppress system sound)
+_has_custom_sound=false
+[[ -n "$_sound_file" && -f "$_sound_file" ]] && _has_custom_sound=true
+
 _play_sound "$_sound_file"
 
 # ─── 8. Send notification (platform-dispatched) ──────────────────────────────
@@ -537,12 +542,18 @@ _send_macos() {
   local notifier
   notifier="$(command -v terminal-notifier 2>/dev/null || true)"
   if [[ -n "$notifier" ]]; then
-    local args=(-title "$TITLE" -message "$MSG" -subtitle "$SUB" -sound "Glass")
+    local args=(-title "$TITLE" -message "$MSG" -subtitle "$SUB")
+    # Only use system sound when no custom sound is configured (avoid overlap)
+    [[ "$_has_custom_sound" == false ]] && args+=(-sound "Glass")
     [[ -n "$TERMINAL_ID" ]] && args+=(-activate "$TERMINAL_ID")
     "$notifier" "${args[@]}"
   else
     # Fallback: basic osascript (no click-to-focus)
-    osascript -e "display notification \"$MSG\" with title \"$TITLE\" subtitle \"$SUB\" sound name \"Glass\""
+    if [[ "$_has_custom_sound" == false ]]; then
+      osascript -e "display notification \"$MSG\" with title \"$TITLE\" subtitle \"$SUB\" sound name \"Glass\""
+    else
+      osascript -e "display notification \"$MSG\" with title \"$TITLE\" subtitle \"$SUB\""
+    fi
   fi
 }
 

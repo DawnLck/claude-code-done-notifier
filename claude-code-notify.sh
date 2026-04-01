@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # claude-code-notify.sh — Claude Code hook
+# Version: 1.0.2
 #
 # Sends a native desktop notification when Claude need notify or finishes a task.
 # • Shows first sentence of Claude's last reply as the task summary.

@@ -53,7 +53,8 @@ if [[ "${1:-}" == "--uninstall" ]]; then
 fi
 
 # ── Install ───────────────────────────────────────────────────────────────────
-printf "\n${CLAUDE}claude-code-notifier — installer${NC}\n"
+VERSION=$(cat "$(dirname "${BASH_SOURCE[0]}")/VERSION" 2>/dev/null || echo "unknown")
+printf "\n${CLAUDE}claude-code-notifier %s — installer${NC}\n" "$VERSION"
 printf "${CLAUDE}  Platform: %s%s${NC}\n\n" "$OS" "$([[ "$IS_WSL" == true ]] && echo ' (WSL)' || echo '')"
 
 # ── 1. Install dependencies (platform-specific) ──────────────────────────────
